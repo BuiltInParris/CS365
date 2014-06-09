@@ -1,0 +1,6 @@
+---
+  - name: Install Pam/NSS Packages
+    apt: name={{ item }}
+    with_items:
+      - libnss-mysql-bg
+      - libpam-mysql

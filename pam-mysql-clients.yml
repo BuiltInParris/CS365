@@ -1,0 +1,4 @@
+---
+- hosts: pam-mysql-clients
+  roles:
+    - pam-mysql-clients
