@@ -6,6 +6,6 @@ m1 ansible_ssh_host=192.168.124.232
 m0 mysql_root_password=foo
 
 [pam-mysql-clients]
-m1
+m1 nss_mysql_user_password=userpass nss_mysql_host=m0 nss_mysql_root_password=rootpass
 
 
