@@ -1,4 +1,4 @@
 ---
 # file: site.yml
-- include: dbservers.yml
-- include: pam-mysql-clients.yml
+- include: nss-mysql-servers.yml
+- include: nss-mysql-clients.yml

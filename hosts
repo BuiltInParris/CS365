@@ -1,11 +1,14 @@
 [soho-hosts]
-m0 ansible_ssh_host=192.168.124.180 
+m0 ansible_ssh_host=192.168.124.180
 m1 ansible_ssh_host=192.168.124.232
 
-[dbservers]
-m0 mysql_root_password=foo
+[nss-mysql-auth:children]
+nss-mysql-servers 
 
-[pam-mysql-clients]
-m1 nss_mysql_user_password=userpass nss_mysql_host=m0 nss_mysql_root_password=rootpass
+[nss-mysql-servers]
+m0 
+
+[nss-mysql-clients]
+m1
 
 

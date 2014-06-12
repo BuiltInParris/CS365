@@ -1,0 +1,48 @@
+---
+  - name: Install Pam/NSS Packages
+    apt: name={{ item }}
+    with_items:
+      - mysql-client
+      - libnss-mysql-bg
+      - libpam-mysql
+
+  - name: Fix libnss-mysql.cfg host
+    lineinfile: "dest=/etc/libnss-mysql.cfg state=present regexp='^host' line='host	{{ nss_mysql_host }}'"
+
+  - name: Fix libnss-mysql user password
+    lineinfile: "dest=/etc/libnss-mysql.cfg state=present regexp='^password' line='password	{{ nss_mysql_user_password }}'"
+
+  - name: Fix libnss-mysql root password
+    lineinfile: "dest=/etc/libnss-mysql-root.cfg state=present regexp='^password' line='password	{{ nss_mysql_root_password }}'"
+
+  - name: Install /etc/pam-mysql.conf
+    template: src=pam-mysql.conf.j2 dest=/etc/pam-mysql.conf owner=root mode=0600
+
+  - name: Add mysql to passwd in nssswitch.conf
+    lineinfile: "dest=/etc/nsswitch.conf state=present regexp='^passwd:' line='passwd:	compat mysql'"
+
+  - name: Add mysql to shadow in nssswitch.conf
+    lineinfile: "dest=/etc/nsswitch.conf state=present regexp='^shadow:' line='shadow:	compat mysql'"
+
+  - name: Add mysql to group in nssswitch.conf
+    lineinfile: "dest=/etc/nsswitch.conf state=present regexp='^group:' line='group:	compat mysql'"
+
+  - name: Add pam_mysql.so to common-account
+    lineinfile: "dest=/etc/pam.d/common-account state=present insertafter='pam_unix.so' line='account sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-auth 
+    lineinfile: "dest=/etc/pam.d/common-auth state=present insertafter='pam_unix.so' line='auth sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-password
+    lineinfile: "dest=/etc/pam.d/common-password state=present insertafter='pam_unix.so' line='password sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-session
+    lineinfile: "dest=/etc/pam.d/common-session state=present insertafter='pam_unix.so' line='session sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Fix success=1 => success=2 for pam.d/common files
+    replace: dest={{ item }} regexp='success=1' replace='success=2'
+    with_items:
+      - /etc/pam.d/common-account
+      - /etc/pam.d/common-auth
+      - /etc/pam.d/common-password
+      - /etc/pam.d/common-session
