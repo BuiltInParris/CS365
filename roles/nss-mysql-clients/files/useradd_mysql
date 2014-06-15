@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+function encryptPassword {
+	openssl passwd -1 "$1"
+}
+
+function genUserAddSQL {
+
+   	local SQLUName="$1"
+	local SQLEPW="$2"
+	local SQLUID="$3"
+	local SQLGID="$4"
+	local SQLGECOS="$5"
+	local SQLHDir="$6"
+	local SQLShell="$7"
+	
+	cat << EOF 
+	INSERT INTO users (username,password,uid,gid,gecos,homedir,shell)
+	    VALUES ('$SQLUName', '$SQLEPW', '$SQLUID', '$SQLGID', '$SQLGECOS', '$SQLHDir', '$SQLShell');
+EOF
+}
+
+function genGroupAddSQL {
+
+        local SQLGName="$1"
+	local SQLGID="$2"
+
+	cat <<EOF
+	INSERT INTO groups (name,gid)
+	    VALUES ('$SQLGName','$SQLGID');
+EOF
+}
+
+function genGroupAddUserSQL {
+
+    	local SQLGID="$1"
+	local i
+	shift
+
+	for i in "$@"
+	do
+	    cat << EOF
+	INSERT INTO grouplist (gid,username)
+	    VALUES ($SQLGID,'$i');
+EOF
+	done
+}
+
+genUserAddSQL 'gmcfoo2' $(encryptPassword "blah") 5002 5002 'G.McFoo2' '/home/gmcfoo2' '/bin/bash'
+genGroupAddSQL 'gmcfoo2' 5002
+genGroupAddUserSQL 5002 gmcfoo2

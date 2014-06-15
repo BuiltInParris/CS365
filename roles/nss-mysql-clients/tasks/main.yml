@@ -46,3 +46,6 @@
       - /etc/pam.d/common-auth
       - /etc/pam.d/common-password
       - /etc/pam.d/common-session
+
+  - name: Copy in new useradd command
+    copy: src="useradd_mysql" dest=/usr/local/bin/useradd_mysql owner=root group=root mode=755

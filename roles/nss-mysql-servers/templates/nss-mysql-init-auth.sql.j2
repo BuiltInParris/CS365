@@ -68,36 +68,71 @@ INSERT INTO grouplist (gid,username)
     VALUES (5000,'cinergi');
 
 # The permissions ...
-GRANT USAGE ON *.* TO `{{ nss_mysql_root_user }}`@`localhost` IDENTIFIED BY '{{ nss_mysql_root_password }}';
-GRANT USAGE ON *.* TO `{{ nss_mysql_user }}`@`localhost` IDENTIFIED BY '{{ nss_mysql_user_password }}';
+GRANT USAGE ON *.* TO '{{ nss_mysql_root_user }}'@'localhost' IDENTIFIED BY '{{ nss_mysql_root_password }}';
+GRANT USAGE ON *.* TO '{{ nss_mysql_root_user }}'@'%' IDENTIFIED BY '{{ nss_mysql_root_password }}';
 
-GRANT Select (`username`, `uid`, `gid`, `gecos`, `homedir`, `shell`, `password`,
-              `lstchg`, `min`, `max`, `warn`, `inact`, `expire`, `flag`)
-             ON `auth`.`users`
+GRANT USAGE ON *.* TO '{{ nss_mysql_user }}'@'localhost' IDENTIFIED BY '{{ nss_mysql_user_password }}';
+GRANT USAGE ON *.* TO '{{ nss_mysql_user }}'@'%' IDENTIFIED BY '{{ nss_mysql_user_password }}';
+
+GRANT Insert,Select,Update ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell', 'password',
+              'lstchg', 'min', 'max', 'warn', 'inact', 'expire', 'flag')
+             ON 'auth'.'users'
              TO '{{ nss_mysql_root_user }}'@'localhost';
-GRANT Select (`name`, `password`, `gid`)
-             ON `auth`.`groups`
+GRANT Insert,Select,Update ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell', 'password',
+              'lstchg', 'min', 'max', 'warn', 'inact', 'expire', 'flag')
+             ON 'auth'.'users'
+             TO '{{ nss_mysql_root_user }}'@'%';
+
+GRANT Insert,Select,Update ('name', 'password', 'gid')
+             ON 'auth'.'groups'
              TO '{{ nss_mysql_root_user }}'@'localhost';
 
-GRANT Update (`username`, `uid`, `gid`, `gecos`, `homedir`, `shell`, `password`,
-              `lstchg`, `min`, `max`, `warn`, `inact`, `expire`, `flag`)
-             ON `auth`.`users`
+GRANT Insert,Select,Update ('name', 'password', 'gid')
+             ON 'auth'.'groups'
+             TO '{{ nss_mysql_root_user }}'@'%';
+
+GRANT Update ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell', 'password',
+              'lstchg', 'min', 'max', 'warn', 'inact', 'expire', 'flag')
+             ON 'auth'.'users'
              TO '{{ nss_mysql_root_user }}'@'localhost';
-GRANT Update (`name`, `password`, `gid`)
-             ON `auth`.`groups`
+GRANT Update ('name', 'password', 'gid')
+             ON 'auth'.'groups'
              TO '{{ nss_mysql_root_user }}'@'localhost';
 
-GRANT Select (`username`, `uid`, `gid`, `gecos`, `homedir`, `shell`)
-             ON `auth`.`users`
+GRANT Select ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell')
+             ON 'auth'.'users'
              TO '{{ nss_mysql_user }}'@'localhost';
-GRANT Select (`name`, `password`, `gid`)
-             ON `auth`.`groups`
+GRANT Select ('name', 'password', 'gid')
+             ON 'auth'.'groups'
              TO '{{ nss_mysql_user }}'@'localhost';
 
-GRANT Select (`username`, `gid`)
-             ON `auth`.`grouplist`
+GRANT Select ('username', 'gid')
+             ON 'auth'.'grouplist'
              TO '{{ nss_mysql_user }}'@'localhost';
-GRANT Select (`username`, `gid`)
-             ON `auth`.`grouplist`
+GRANT Select ('username', 'gid')
+             ON 'auth'.'grouplist'
              TO '{{ nss_mysql_root_user }}'@'localhost';
+
+
+GRANT Select ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell', 'password',
+              'lstchg', 'min', 'max', 'warn', 'inact', 'expire', 'flag')
+             ON 'auth'.'users'
+             TO '{{ nss_mysql_root_user }}'@'%';
+GRANT Select ('name', 'password', 'gid')
+             ON 'auth'.'groups'
+             TO '{{ nss_mysql_root_user }}'@'%';
+
+GRANT Select ('username', 'uid', 'gid', 'gecos', 'homedir', 'shell')
+             ON 'auth'.'users'
+             TO '{{ nss_mysql_user }}'@'%';
+GRANT Select ('name', 'password', 'gid')
+             ON 'auth'.'groups'
+             TO '{{ nss_mysql_user }}'@'%';
+
+GRANT Select ('username', 'gid')
+             ON 'auth'.'grouplist'
+             TO '{{ nss_mysql_user }}'@'%';
+GRANT Select ('username', 'gid')
+             ON 'auth'.'grouplist'
+             TO '{{ nss_mysql_root_user }}'@'%';
 
