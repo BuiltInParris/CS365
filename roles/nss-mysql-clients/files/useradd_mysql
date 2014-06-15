@@ -1,5 +1,50 @@
 #!/bin/bash
 
+AUTHDB=auth
+
+SHELL=/bin/sh
+GROUP=100
+MYHOME=/home
+INACTIVE=-1
+EXPIRE=
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+DB=$(grep database /etc/libnss-mysql.cfg | awk '{print $2}')
+DBHost=$(grep host /etc/libnss-mysql.cfg | awk '{print $2}')
+RootUser=$(grep username /etc/libnss-mysql-root.cfg  | awk '{print $2}')
+RootPW=$(grep password /etc/libnss-mysql-root.cfg  | awk '{print $2}')
+
+
+DefaultsFile="/etc/defaults/useradd"
+[ -e "$DefaultsFile" ] && . "$DefaultsFile"
+
+function sys {
+	[ -n "${opt_n}${opt_v}" ] && echo "$@" 1>&2
+
+	if [ -z "$opt_n" ]
+	then
+		"$@"
+	fi
+}
+
+#
+# opt_v executes mysql and passes the mysql to stdout
+# opt_n no-ops the mysql command, and only copys input to output
+#
+function verbMySQL {
+	if [ -z "$opt_n" ]
+	then
+	    if [ -n "$opt_v" ]
+	    then
+		tee >(mysql -Bsh "$DBHost" $AUTHDB 1>&2)
+	    else
+		mysql -Bsh "$DBHost" $AUTHDB 1>&2
+	    fi
+	else
+	    cat
+	fi
+}
 
 function encryptPassword {
 	openssl passwd -1 "$1"
@@ -47,6 +92,108 @@ EOF
 	done
 }
 
-genUserAddSQL 'gmcfoo2' $(encryptPassword "blah") 5002 5002 'G.McFoo2' '/home/gmcfoo2' '/bin/bash'
-genGroupAddSQL 'gmcfoo2' 5002
-genGroupAddUserSQL 5002 gmcfoo2
+function userAdd2DB {
+    	genUserAddSQL "$@" | verbMySQL
+}
+
+function groupAdd2DB {
+	genGroupAddSQL "$@" | verbMySQL
+}
+
+function groupAddUser2DB {
+	genGroupAddUserSQL "$@" | verbMySQL
+}
+
+function nextUid {
+	local Uid=$(mysql -Bsh "$DBHost"  -e 'select uid from users order by uid desc limit 1' auth)
+	echo $((++Uid))
+}
+
+function nextSysUid {
+	local SysUid=
+}
+
+function nextGid {
+	local Gid=$(mysql -Bsh "$DBHost" -e 'select gid from groups order by uid desc limit 1' auth)
+	echo $((++Gid))
+}
+
+while getopts "b:c:d:e:f:g:G:hk:K:lmMNop:rR:s:u:Uz" arg
+do
+	case $arg in
+	    #
+	    # Ignore these flags for now
+	    #
+	    b|D|e|f|k|K|l|N|o|R|z)
+		;;
+	    *)
+		eval "opt_${arg}=${OPTARG:=1}"
+		;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+UName=$1
+
+if [ -n "$opt_c" ]
+then
+	GeCOS="$opt_c"
+else
+	GeCOS="$UName"
+fi
+
+if [ -n "$opt_d" ]
+then
+	HDir="$opt_d"
+else
+	HDir="$MYHOME/$UName"
+fi
+
+if [ -n "$opt_g" ]
+then
+	Gid=$opt_g
+else
+	Gid=$(nextGid)
+fi
+
+if [ -n "$opt_m" ]
+then
+	CREATE_HOME=1
+fi
+
+if [ -n "$opt_p" ]
+then
+	EPW=$(encryptPassword "$opt_p")
+else
+	EPW='x'
+fi
+
+if [ -n "$opt_s" ]
+then
+	SHELL="$opt_s"
+fi
+
+if [ -n "$opt_u" ]
+then
+	Uid=$opt_u
+else
+	if [ -n "$opt_r" ]
+	then
+	    Uid=$(nextSysUid)
+	else
+	    Uid=$(nextUid)
+	fi
+fi
+
+
+userAdd2DB "$UName" "$EPW" "$Uid" "$Gid" "$GeCOS" "$HDir" "$SHELL"
+groupAdd2DB "$GName" "$Gid"
+groupAddUser2DB "$Gid" "$UName"
+
+if [ -n "$CREATE_HOME" ]
+then
+	[ -e "$HDir" ] || sys mkdir "$HDir"
+	sys rsync -a "${SKEL}/" "$HDir/"
+	sys chown -R "${UName}.${Gid}" "$HDir"
+fi
