@@ -19,6 +19,10 @@ RootPW=$(grep password /etc/libnss-mysql-root.cfg  | awk '{print $2}')
 DefaultsFile="/etc/defaults/useradd"
 [ -e "$DefaultsFile" ] && . "$DefaultsFile"
 
+DefaultAddUserConf="/etc/adduser.conf"
+[ -e "$DefaultAddUserConf" ] && . "$DefaultAddUserConf"
+
+
 function sys {
 	[ -n "${opt_n}${opt_v}" ] && echo "$@" 1>&2
 
@@ -105,16 +109,23 @@ function groupAddUser2DB {
 }
 
 function nextUid {
-	local Uid=$(mysql -Bsh "$DBHost"  -e 'select uid from users order by uid desc limit 1' auth)
+	local Uid=$(mysql -Bsh "$DBHost" -e 'SELECT uid FROM users ORDER BY uid DESC LIMIT 1' auth)
 	echo $((++Uid))
 }
 
 function nextSysUid {
-	local SysUid=
+	local SysUid=$(mysql -Bsh "$DBHost" -e "SELECT uid FROM users WHERE uid >= $FIRST_SYSTEM_UID and uid <= $LAST_SYSTEM_UID ORDER BY gid DESC LIMIT 1" auth)
+
+	if [ -z "$SysUID" ]
+	then
+		SysUid=$FIRST_SYSTEM_UID
+	fi
+
+	echo $SysUid
 }
 
 function nextGid {
-	local Gid=$(mysql -Bsh "$DBHost" -e 'select gid from groups order by uid desc limit 1' auth)
+	local Gid=$(mysql -Bsh "$DBHost" -e 'select gid from groups order by gid desc limit 1' auth)
 	echo $((++Gid))
 }
 
