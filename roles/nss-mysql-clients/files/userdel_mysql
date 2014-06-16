@@ -1,0 +1,80 @@
+#!/bin/bash
+
+cmd=$(basename $0)
+
+function warning {
+	echo "$@" 1>&2
+}
+
+while getopts fhnrRvZ arg
+do
+	case $arg in
+		f|R|Z)
+			true
+			;;
+		*)
+			eval "opt_${arg}=${OPTARG:=1}"
+			;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+function rmUserFromGroup {
+	local User="$1"
+	local G="$2"
+	local Gid
+
+	if echo "$G" | grep -q -P '^\d+$'
+	then
+		Gid="$G"
+	else
+		Gid=$(getent group "$G" | cut -f 3 -d :)
+	fi
+
+	echo rmUserFromGID "$User" "$Gid"
+}
+
+function rmUserFromGroups {
+	local User="$1"
+	shift
+
+	for i in "$@"
+	do
+		rmUserFromGroup "$User" "$i"
+	done
+}
+
+function rmUser {
+	local User="$1"
+
+	echo rmUser "$User"
+}
+
+User="$1"
+
+OIFS="$IFS"
+IFS=:
+read -a UserEntry <<<"$(getent passwd $User)"
+IFS="$OIFS"
+
+if [ -z "${UserEntry[*]}" ]
+then
+	warning "$cmd : No user '$User'"
+	exit 1
+fi
+
+rmUser "$User"
+
+Groups=($(id -G "$User" | tr '[ ]' '[\012]' | sort -u))
+rmUserFromGroups "$User" "${Groups[@]}"
+
+if [ -n "$opt_r" ]
+then
+	HDir="${UserEntry[5]}"
+	echo rm -rf "$HDir"
+	#
+	# Should also remove the mail dir
+	#
+fi
+
