@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cmd=$(basename $0)
+
 AUTHDB=auth
 
 SHELL=/bin/sh
@@ -41,12 +43,25 @@ DefaultAddUserConf="/etc/adduser.conf"
 [ -e "$DefaultAddUserConf" ] && . "$DefaultAddUserConf"
 
 
+function warning {
+	echo "$@" 1>&2
+}
+
 function sys {
 	[ -n "${opt_n}${opt_v}" ] && echo "$@" 1>&2
 
 	if [ -z "$opt_n" ]
 	then
 		"$@"
+	fi
+}
+
+function mySQL {
+	if [ -n "$1" ]
+	then
+		mysql -Bsh "$DBHost" -e "$@" "$AUTHDB" 
+	else
+		mysql -Bsh "$DBHost" "$AUTHDB" 
 	fi
 }
 
@@ -61,7 +76,7 @@ function verbMySQL {
 	    then
 		tee >(mysql -Bsh "$DBHost" $AUTHDB 1>&2)
 	    else
-		mysql -Bsh "$DBHost" $AUTHDB 1>&2
+		mySQL 
 	    fi
 	else
 	    cat
@@ -114,26 +129,25 @@ EOF
 	done
 }
 
-function userAdd2DB {
+function addUser_MySQL {
     	genUserAddSQL "$@" | verbMySQL
 }
 
-function groupAdd2DB {
+function addGroup_MySQL {
 	genGroupAddSQL "$@" | verbMySQL
 }
 
-function groupAddUser2DB {
+function addUserToGroup_MySQL {
 	genGroupAddUserSQL "$@" | verbMySQL
 }
 
-function nextUid {
+function getNextUid {
 	local Uid=$(mysql -Bsh "$DBHost" -e 'SELECT uid FROM users ORDER BY uid DESC LIMIT 1' auth)
 	echo $((++Uid))
 }
 
-function nextSysUid {
+function getNextSysUid {
 	local SysUid=$(mysql -Bsh "$DBHost" -e "SELECT uid FROM users WHERE uid >= $FIRST_SYSTEM_UID and uid <= $LAST_SYSTEM_UID ORDER BY gid DESC LIMIT 1" auth)
-
 	if [ -z "$SysUID" ]
 	then
 		SysUid=$FIRST_SYSTEM_UID
@@ -142,9 +156,51 @@ function nextSysUid {
 	echo $SysUid
 }
 
-function nextGid {
-	local Gid=$(mysql -Bsh "$DBHost" -e 'select gid from groups order by gid desc limit 1' auth)
+function getGroupIDByName {
+	local GName="$1"
+
+	mySQL "SELECT gid FROM groups WHERE name = '$GName' ORDER BY gid DESC"
+}
+
+function getNextGid {
+	local Gid=$(mySQL 'select gid from groups order by gid desc limit 1' )
+
 	echo $((++Gid))
+}
+
+function addUsersToGroup {
+	local Sub=AddUsersToGroup
+	local G="$1"
+	local Gid
+
+	if [ -z "$G" ]
+	then
+		warning "$cmd($Sub) : Missing Group"
+		return 1
+	fi
+
+	shift
+
+	if echo "$G" | grep -q -P '^\d+$'
+	then
+		Gid="$G"
+	else
+		Gid=$(getGroupIDByName "$G")
+		if [ -z "$Gid" ]
+		then
+			warning "$cmd($Sub) : Invalid Group Name '$G'"
+			return 2
+		fi
+	fi
+
+	for i in "$@"
+	do
+		if ! addUserToGroup_MySQL "$Gid" $i
+		then
+			warning "$cmd($Sub) : Could not add '$i' to $Gid"
+			return 3
+		fi
+	done
 }
 
 while getopts "b:c:d:e:f:g:G:hk:K:lmMNop:rR:s:u:Uz" arg
@@ -179,12 +235,12 @@ else
 	HDir="$MYHOME/$UName"
 fi
 
-GName="$Uname"
+GName="$UName"
 if [ -n "$opt_g" ]
 then
 	Gid=$opt_g
 else
-	Gid=$(nextGid)
+	Gid=$(getNextGid)
 fi
 
 if [ -n "$opt_m" ]
@@ -210,16 +266,19 @@ then
 else
 	if [ -n "$opt_r" ]
 	then
-	    Uid=$(nextSysUid)
+	    Uid=$(getNextSysUid)
 	else
-	    Uid=$(nextUid)
+	    Uid=$(getNextUid)
 	fi
 fi
 
+addUser_MySQL "$UName" "$EPW" "$Uid" "$Gid" "$GeCOS" "$HDir" "$SHELL"
+addGroup_MySQL "$GName" "$Gid"
 
-userAdd2DB "$UName" "$EPW" "$Uid" "$Gid" "$GeCOS" "$HDir" "$SHELL"
-groupAdd2DB "$GName" "$Gid"
-groupAddUser2DB "$Gid" "$UName"
+for i in "$Gid" $(echo $opt_G | sed 's/,/ /g')
+do
+	addUsersToGroup "$i" "$UName"
+done
 
 if [ -n "$CREATE_HOME" ]
 then
