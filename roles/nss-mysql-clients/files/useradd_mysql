@@ -12,9 +12,27 @@ CREATE_MAIL_SPOOL=yes
 
 DB=$(grep database /etc/libnss-mysql.cfg | awk '{print $2}')
 DBHost=$(grep host /etc/libnss-mysql.cfg | awk '{print $2}')
-RootUser=$(grep username /etc/libnss-mysql-root.cfg  | awk '{print $2}')
-RootPW=$(grep password /etc/libnss-mysql-root.cfg  | awk '{print $2}')
+NSSUSER=$(grep username /etc/libnss-mysql.cfg  | awk '{print $2}')
+NSSUSERPW=$(grep password /etc/libnss-mysql.cfg | awk '{print $2}')
 
+#
+# User and Password are supposed to come from ~/my.cnf for root
+#
+
+if [ "$EUID" == 0 ]
+then
+	MyCNF=~root/.my.cnf
+else
+	#
+	# *** Create a my.cnf file for nss-user and reference that
+	#
+	MyCNF="$(mktemp /tmp/mycnf.$$)"
+	cat << EOF >  "$MyCNF"
+[client]
+user = $NSSUSER
+password = $NSSUSERPW
+EOF
+fi
 
 DefaultsFile="/etc/defaults/useradd"
 [ -e "$DefaultsFile" ] && . "$DefaultsFile"
@@ -161,6 +179,7 @@ else
 	HDir="$MYHOME/$UName"
 fi
 
+GName="$Uname"
 if [ -n "$opt_g" ]
 then
 	Gid=$opt_g
