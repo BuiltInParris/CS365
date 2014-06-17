@@ -2,9 +2,9 @@
 
 cmd=$(basename $0)
 
-function warning {
-	echo "$@" 1>&2
-}
+LibUserAddFile=${LibUserAddMySQL:=/usr/lib/libuseradd_mysql.sh}
+
+[ -e "$LibUserAddFile" ] && . "$LibUserAddFile"
 
 while getopts fhnrRvZ arg
 do
@@ -20,36 +20,6 @@ done
 
 shift $((OPTIND - 1))
 
-function rmUserFromGroup {
-	local User="$1"
-	local G="$2"
-	local Gid
-
-	if echo "$G" | grep -q -P '^\d+$'
-	then
-		Gid="$G"
-	else
-		Gid=$(getent group "$G" | cut -f 3 -d :)
-	fi
-
-	echo rmUserFromGID "$User" "$Gid"
-}
-
-function rmUserFromGroups {
-	local User="$1"
-	shift
-
-	for i in "$@"
-	do
-		rmUserFromGroup "$User" "$i"
-	done
-}
-
-function rmUser {
-	local User="$1"
-
-	echo rmUser "$User"
-}
 
 User="$1"
 
@@ -64,17 +34,19 @@ then
 	exit 1
 fi
 
-rmUser "$User"
+rmUserMySQL "$User"
 
-Groups=($(id -G "$User" | tr '[ ]' '[\012]' | sort -u))
-rmUserFromGroups "$User" "${Groups[@]}"
+rmUserFromGroupsMySQL "$User" 
+
+rmGroupMySQL "$User"
 
 if [ -n "$opt_r" ]
 then
 	HDir="${UserEntry[5]}"
-	echo rm -rf "$HDir"
+	[ -e "$HDir" ] &&
+		sys rm -rf "$HDir"
 	#
-	# Should also remove the mail dir
+	# Should also remove the mail dir, cronjobs, at jobs, and more.
 	#
 fi
 
