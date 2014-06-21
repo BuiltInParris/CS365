@@ -1,0 +1,2 @@
+---
+- hosts: soho-hosts
