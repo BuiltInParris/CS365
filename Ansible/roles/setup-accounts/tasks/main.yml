@@ -1,0 +1,13 @@
+---
+- name: create groups
+  group: name=g{{ item }} state=present
+  with_sequence:
+    - count=6
+
+- name: add users
+  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  with_items:
+  - { name: 'user1', uid: '5001', groups: 'g1,g2' }
+  - { name: 'user2', uid: '5002', groups: 'g1,g2' }
+  - { name: 'user3', uid: '5003', groups: 'g2,g3,g4' }
+  - { name: 'user6', uid: '5005', groups: 'g4,g5,g6' }

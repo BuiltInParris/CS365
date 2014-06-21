@@ -1,6 +1,4 @@
 ---
-
-
 - hosts: nss-mysql-clients
   roles:
     - common
