@@ -47,5 +47,19 @@
       - /etc/pam.d/common-password
       - /etc/pam.d/common-session
 
-  - name: Copy in new useradd command
-    copy: src="useradd_mysql" dest=/usr/local/bin/useradd_mysql owner=root group=root mode=755
+  - name: Copy in new useradd commands
+    copy: src="{{ item }}" dest=/usr/local/bin/{{ item }} owner=root group=root mode=755
+    with_items:
+      - useradd_mysql
+      - usermod_mysql
+      - userdel_mysql
+      - chage_mysql
+
+  - name: Move old useradd commands out of the way
+    file: src=/usr/local/bin/{{ item }}_mysql dest=/usr/sbin/{{ item }} owner=root group=root state=link force=true
+    with_items:
+      - useradd
+      - usermod
+      - userdel
+      - chage
+  
