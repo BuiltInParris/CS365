@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#
+# Create a new user and verify the next UID is used and no
+# home directory is created
+#
+
+function getMaxUID {
+    getent passwd | sort -nr  -k +3 -t : | grep -v nobody | head -n 1 | cut -f 3 -d :
+}
+
+OldUid=$(getMaxUID)
+User=gmcfoo-$((OldUid + 1))
+useradd "$User"
+
+NewUid=$(getMaxUID)
+HDir=$(getent passwd "$User" | cut -f 6 -d :)
+
+if [ $(($OldUid + 1)) = "$NewUid" ] && [ ! -d "$HDir" ]
+then
+    echo $0 - OK
+else
+    echo $0 - Failed
+fi
+
+exit 0
+
