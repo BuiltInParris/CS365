@@ -6,7 +6,7 @@ LibUserAddFile=${LibUserAddMySQL:=/usr/lib/libuseradd_mysql.sh}
 
 [ -e "$LibUserAddFile" ] && . "$LibUserAddFile"
 
-while getopts "b:c:d:e:f:g:G:hk:K:lmMNop:rR:s:u:Uz" arg
+while getopts "b:c:d:e:f:g:G:hk:K:lmMnNop:rR:s:u:vUz" arg
 do
 	case $arg in
 	    #
@@ -42,6 +42,11 @@ GName="$UName"
 if [ -n "$opt_g" ]
 then
 	Gid=$opt_g
+	if ! echo "$Gid" | grep -P '^\d+$'
+	then
+		Gid=$(getent group "$Gid" | cut -f 3 -d :)
+		[ -z "$Gid" ] && Gid=$(getNextGid)
+	fi
 else
 	Gid=$(getNextGid)
 fi
@@ -75,10 +80,15 @@ else
 	fi
 fi
 
-addUser_MySQL "$UName" "$EPW" "$Uid" "$Gid" "$GeCOS" "$HDir" "$SHELL"
-addGroup_MySQL "$GName" "$Gid"
+OldGid=$(getGroupIDMySQL "$GName")
+if [ -z "$OldGid" ]
+then
+	addGroup_MySQL "$GName" "$Gid"
+fi
 
-for i in "$Gid" $(echo $opt_G | sed 's/,/ /g')
+addUser_MySQL "$UName" "$EPW" "$Uid" "$Gid" "$GeCOS" "$HDir" "$SHELL"
+
+for i in $(echo $opt_G | sed 's/,/ /g')
 do
 	addUsersToGroup "$i" "$UName"
 done
@@ -88,4 +98,6 @@ then
 	[ -e "$HDir" ] || sys mkdir "$HDir"
 	sys rsync -a "${SKEL}/" "$HDir/"
 	sys chown -R "${UName}.${Gid}" "$HDir"
+else
+	true
 fi

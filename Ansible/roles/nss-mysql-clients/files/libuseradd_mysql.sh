@@ -34,7 +34,7 @@ function sys {
 function cmdMySQL {
 	if [ -n "$*" ]
 	then
-	    mysql -NB -h "$MySQLHost" -e "$@" "$MySQLDB"
+	    mysql -NB -h "$MySQLHost" -e "$*" "$MySQLDB"
 	else
 	    mysql -NB -h "$MySQLHost" "$MySQLDB"
 	fi
@@ -45,7 +45,7 @@ function verbCmdMySQL {
 	then
 	    if [ -n "$*" ]
 	    then
-		warning mysql -h "$MySQLHost" -e "$@" "$MySQLDB"
+		warning mysql -h "$MySQLHost" -e "$*" "$MySQLDB"
 	    else
 		cat
 		warning mysql -h "$MySQLHost" "$MySQLDB"
@@ -54,7 +54,7 @@ function verbCmdMySQL {
 	then
 		if [ -n "$*" ]
 		then
-			warning mysql -h "$MySQLHost" -e "$@" "$MySQLDB"
+			warning mysql -h "$MySQLHost" -e "$*" "$MySQLDB"
 			cmdMySQL "$@"
 		else
 			tee >(cmdMySQL)
@@ -182,7 +182,31 @@ function setUserWarnDaysMySQL {
 	local User="$1"
 	local Days="$2"
 
-	verbCmdMySQL "UPDATE users SET warn= '$Days' WHERE username = '$User'"
+	verbCmdMySQL "UPDATE users SET warn = '$Days' WHERE username = '$User'"
+}
+
+# setGroupGid "$Group" "$opt_g"
+function setGroupGid {
+	local Group="$1"
+	local Gid="$2"
+
+	verbCmdMySQL "UPDATE groups SET gid = '$Gid' WHERE name = '$Group'"
+}
+
+# setGroupName "$Group" "$opt_n"
+function setGroupName {
+	local OldGroupName="$1"
+	local NewGroupName="$2"
+
+	verbCmdMySQL "UPDATE groups SET name = '$NewGroupName' WHERE name = '$OldGroupName'"
+}
+
+# setGroupEPW "$Group" "$opt_p"
+function setGroupEPW {
+	local Group="$1"
+	local EPW="$2"
+
+	verbCmdMySQL "UPDATE groups SET password = '$EPW' WHERE name = '$Group'"
 }
 
 # getUserAgingMySQL "$User" "$opt_l"
@@ -203,6 +227,14 @@ function addGroup_MySQL {
 #rmUserMySQL "$User"
 function rmUserMySQL {
 	local User="$1"
+
+	verbCmdMySQL "DELETE FROM users where username = '$User'"
+}
+
+function getGroupIDMySQL {
+	local Group="$1"
+	
+	cmdMySQL "SELECT gid FROM groups WHERE name = '$Group'"
 }
 
 #rmUserFromGroupsMySQL "$User" 
@@ -216,7 +248,7 @@ function rmUserFromGroupsMySQL {
 function rmGroupMySQL {
 	local Group="$1"
 
-	verbCmdMySQL "DELETE FROM group where name = '$Group'"
+	verbCmdMySQL "DELETE FROM groups WHERE name = '$Group'"
 }
 
 function getNextGid {
@@ -257,7 +289,7 @@ function getNextSysUid {
 
 function getNextSysGid {
 	local MaxUID=$(cmdMySQL "SELECT gid FROM group WHERE gid < $GID_MAX ORDER BY gid DESC limit 1")
-
+pp
 	if [ -z "$MaxGID" ]
 	then
 		warning "No gids in group table"
@@ -276,9 +308,17 @@ function addUserToGidMySQL {
 
 function addUsersToGroup {
 	local Group="$1"
+	shift
+
+	local Gid
 	local i
 
-	local Gid=$(cmdMySQL "SELECT gid FROM groups WHERE name = '$Group'")
+	if echo "$Group" | grep -Pq '^\d+$'
+	then
+		Gid="$Group"
+	else
+		Gid=$(cmdMySQL "SELECT gid FROM groups WHERE name = '$Group'")
+	fi
 
 	for i in "$@"
 	do

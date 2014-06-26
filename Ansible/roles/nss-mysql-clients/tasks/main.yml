@@ -56,13 +56,23 @@
       - useradd_mysql
       - usermod_mysql
       - userdel_mysql
+      - groupadd_mysql
+      - groupdel_mysql
+      - groupmod_mysql
       - chage_mysql
 
-  - name: Move old useradd commands out of the way
+  - name: Move old /usr/sbin useradd commands out of the way
     file: src=/usr/local/bin/{{ item }}_mysql dest=/usr/sbin/{{ item }} owner=root group=root state=link force=true
     with_items:
       - useradd
       - usermod
       - userdel
+      - groupadd
+      - groupdel
+      - groupmod
+
+  - name: Move old /usr/bin useradd commands out of the way
+    file: src=/usr/local/bin/{{ item }}_mysql dest=/usr/bin/{{ item }} owner=root group=root state=link force=true
+    with_items:
       - chage
   
