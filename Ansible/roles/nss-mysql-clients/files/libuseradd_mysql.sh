@@ -14,8 +14,8 @@ then
 	exit 1
 fi
 
-MySQLHost=$(grep host "$LibNssMySQLCFG" | awk '${print $2}')
-MySQLDB=$(grep database "$LibNssMySQLCFG" | awk '${print $2}')
+MySQLHost=$(grep host "$LibNssMySQLCFG" | awk '{print $2}')
+MySQLDB=$(grep database "$LibNssMySQLCFG" | awk '{print $2}')
 
 function sys {
 	[ -n "${opt_n}${opt_v}" ] && echo "$@"
@@ -23,7 +23,7 @@ function sys {
 }
 
 function cmdMySQL {
-	mysql -h "$MySQLHost" -e "$@" "$MySQLDB"
+	mysql -NB -h "$MySQLHost" -e "$@" "$MySQLDB"
 }
 
 function verbCmdMySQL {
@@ -125,4 +125,33 @@ function rmUserFromGroupsMySQL {
 function rmGroupMySQL {
 	local User="$1"
 }
+
+function getNextGid {
+	local MaxGID=$(cmdMySQL "SELECT gid FROM groups ORDER BY gid DESC limit 1")
+
+	if [ -z "$MaxGID" ]
+	then
+		warning "No gids in group table"
+		return 1
+	fi
+
+	echo $(($MaxGID + 1))
+}
+
+function getNextUid {
+	local MaxUID=$(cmdMySQL "SELECT uid FROM users ORDER BY uid DESC limit 1")
+
+	if [ -z "$MaxUID" ]
+	then
+		warning "No uids in users table"
+		return 1
+	fi
+
+	echo $(($MaxUID + 1))
+}
+
+function addUsersToGroup {
+	local Group="$1"
+}
+
 
