@@ -5,28 +5,22 @@
     - count=6
 
 - name: add users for m0
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm0'
   with_items:
-  - { name: 'user1', uid: '5001', groups: 'g1,g2' }
-  - { name: 'user2', uid: '5002', groups: 'g1,g2' }
-  - { name: 'user3', uid: '5003', groups: 'g2,g3,g4' }
+  - "{{ m0_accounts }}"
 
 - name: add users for m1
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm1'
   with_items:
-  - { name: 'user2', uid: '5001', groups: 'g1,g2' }
-  - { name: 'user3', uid: '5002', groups: 'g2,g3,g4' }
-  - { name: 'user6', uid: '5005', groups: 'g4,g5,g6' }
+  - "{{ m1_accounts }}"
 
 - name: add users for m2
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm2'
   with_items:
-  - { name: 'user2', uid: '5002', groups: 'g1,g2' }
-  - { name: 'user3', uid: '5003', groups: 'g2,g3,g4' }
-  - { name: 'user6', uid: '5005', groups: 'g4,g5,g6' }
+  - "{{ m2_accounts }}"
 
 - name: Get list of home directories
   command: ls /home
@@ -36,3 +30,8 @@
   lineinfile: dest=/home/{{ item }}/myfile state=present regexp='^.*$' line={{ item }} create=true owner={{ item }} group={{ item }} mode=0644
   with_items:
   - "{{ home_dirs.stdout_lines }}"
+
+- name: Account Unit Tests
+  include: unit_tests.yml
+  tags: unit_tests
+
