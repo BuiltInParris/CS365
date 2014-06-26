@@ -47,8 +47,11 @@
       - /etc/pam.d/common-password
       - /etc/pam.d/common-session
 
+  - name: Copy in libuseradd_mysql.sh
+    copy: src=libuseradd_mysql.sh dest=/usr/lib/libuseradd_mysql.sh owner=root group=root mode=755
+
   - name: Copy in new useradd commands
-    copy: src="{{ item }}" dest=/usr/local/bin/{{ item }} owner=root group=root mode=755
+    copy: src={{ item }} dest=/usr/local/bin/{{ item }} owner=root group=root mode=755
     with_items:
       - useradd_mysql
       - usermod_mysql
