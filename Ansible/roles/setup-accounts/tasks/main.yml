@@ -5,19 +5,19 @@
     - count=6
 
 - name: add users for m0
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm0'
   with_items:
   - "{{ m0_accounts }}"
 
 - name: add users for m1
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm1'
   with_items:
   - "{{ m1_accounts }}"
 
 - name: add users for m2
-  user: name={{ item.name }} state=present groups={{ item.groups }}, uid={{ item.uid }}
+  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
   when: hostname == 'm2'
   with_items:
   - "{{ m2_accounts }}"
