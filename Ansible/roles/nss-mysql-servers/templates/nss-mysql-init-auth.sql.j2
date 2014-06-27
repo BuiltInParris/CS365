@@ -74,19 +74,19 @@ GRANT USAGE ON *.* TO '{{ nss_mysql_root_user }}'@'%' IDENTIFIED BY '{{ nss_mysq
 GRANT USAGE ON *.* TO '{{ nss_mysql_user }}'@'localhost' IDENTIFIED BY '{{ nss_mysql_user_password }}';
 GRANT USAGE ON *.* TO '{{ nss_mysql_user }}'@'%' IDENTIFIED BY '{{ nss_mysql_user_password }}';
 
-GRANT Select (username, uid, gid, gecos, homedir, shell, password,
+GRANT Delete,Select,Insert,Update (username, uid, gid, gecos, homedir, shell, password,
               lstchg, min, max, warn, inact, expire, flag)
              ON users
              TO '{{ nss_mysql_root_user }}'@'localhost';
-GRANT Select (username, uid, gid, gecos, homedir, shell, password,
+GRANT Delete,Select,Insert,Update (username, uid, gid, gecos, homedir, shell, password,
               lstchg, min, max, warn, inact, expire, flag)
              ON users
              TO '{{ nss_mysql_root_user }}'@'%';
 
-GRANT Select (name, password, gid)
+GRANT Delete,Select,Insert,Update (name, password, gid)
              ON groups
              TO '{{ nss_mysql_root_user }}'@'localhost';
-GRANT Select (name, password, gid)
+GRANT Delete,Select,Insert,Update (name, password, gid)
              ON groups
              TO '{{ nss_mysql_root_user }}'@'%';
 
@@ -101,7 +101,11 @@ GRANT Select (name, password, gid)
 GRANT Select (username, gid)
              ON grouplist
              TO '{{ nss_mysql_user }}'@'%';
-GRANT Select (username, gid)
+
+GRANT Delete,Select,Insert,Update (username, gid)
+             ON grouplist
+             TO '{{ nss_mysql_root_user }}'@'localhost';
+GRANT Delete,Select,Insert,Update (username, gid)
              ON grouplist
              TO '{{ nss_mysql_root_user }}'@'%';
 

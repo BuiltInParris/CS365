@@ -3,6 +3,7 @@
 cmd=${cmd:=libuseradd.sh}
 
 LibNssMySQLCFG=/etc/libnss-mysql.cfg
+LibNssMySQLRootCFG=/etc/libnss-mysql-root.cfg
 AddUserConf=/etc/adduser.conf
 LoginDefs=/etc/login.defs
 
@@ -23,8 +24,10 @@ then
 	exit 1
 fi
 
-MySQLHost=$(grep host "$LibNssMySQLCFG" | awk '{print $2}')
-MySQLDB=$(grep database "$LibNssMySQLCFG" | awk '{print $2}')
+MySQLHost=$(grep '^host' "$LibNssMySQLCFG" | awk '{print $2}')
+MySQLDB=$(grep '^database' "$LibNssMySQLCFG" | awk '{print $2}')
+MySQLUser=$(grep '^username' "$LibNssMySQLRootCFG" | awk '{print $2}')
+MySQLUserPW=$(grep '^password' "$LibNssMySQLRootCFG" | awk '{print $2}')
 
 function sys {
 	[ -n "${opt_n}${opt_v}" ] && warning "$@"
@@ -34,9 +37,9 @@ function sys {
 function cmdMySQL {
 	if [ -n "$*" ]
 	then
-	    mysql -NB -h "$MySQLHost" -e "$*" "$MySQLDB"
+	    mysql -NB -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" -e "$*" "$MySQLDB"
 	else
-	    mysql -NB -h "$MySQLHost" "$MySQLDB"
+	    mysql -NB -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" "$MySQLDB"
 	fi
 }
 
@@ -45,20 +48,20 @@ function verbCmdMySQL {
 	then
 	    if [ -n "$*" ]
 	    then
-		warning mysql -h "$MySQLHost" -e "$*" "$MySQLDB"
+		warning mysql -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" -e "$*" "$MySQLDB"
 	    else
 		cat
-		warning mysql -h "$MySQLHost" "$MySQLDB"
+		warning mysql -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" "$MySQLDB"
 	    fi
 	elif [ -n "$opt_v" ]
 	then
 		if [ -n "$*" ]
 		then
-			warning mysql -h "$MySQLHost" -e "$*" "$MySQLDB"
+			warning mysql -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" -e "$*" "$MySQLDB"
 			cmdMySQL "$@"
 		else
 			tee >(cmdMySQL)
-			warning mysql -h "$MySQLHost" "$MySQLDB"
+			warning mysql -h "$MySQLHost" -u "$MySQLUser" -p"$MySQLUserPW" "$MySQLDB"
 			warning ""
 		fi
 	else

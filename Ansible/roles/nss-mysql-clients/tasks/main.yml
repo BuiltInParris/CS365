@@ -40,7 +40,7 @@
     lineinfile: "dest=/etc/pam.d/common-session state=present insertafter='pam_unix.so' line='session sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
 
   - name: Fix success=1 => success=2 for pam.d/common files
-    replace: dest={{ item }} regexp='success=1' replace='success=2'
+    shell: sed -i 's/success=1/success=2/' {{ item }}
     with_items:
       - /etc/pam.d/common-account
       - /etc/pam.d/common-auth
