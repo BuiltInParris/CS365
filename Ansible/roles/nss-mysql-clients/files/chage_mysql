@@ -39,24 +39,27 @@ then
 	exit 1
 fi
 
-[ -n "$opt_d" ] &&
+#
+# Last return code needs to be true
+#
+[ -z "$opt_d" ] ||
 	setUserLastDayMySQL "$User" "$opt_d"
 
-[ -n "$opt_E" ] &&
+[ -z "$opt_E" ] ||
 	setUserExpireDateMySQL "$User" "$opt_E"
 
-[ -n "$opt_I" ] &&
+[ -z "$opt_I" ] ||
 	setUserInactiveMySQL "$User" "$opt_I"
 
-[ -n "$opt_l" ] &&
+[ -z "$opt_l" ] ||
 	getUserAgingMySQL "$User" "$opt_l"
 
-[ -n "$opt_m" ] &&
+[ -n "$opt_m" ] ||
 	setUserMinDaysMySQL "$User" "$opt_m"
 
-[ -n "$opt_M" ] &&
+[ -n "$opt_M" ] ||
 	setUserMaxDaysMySQL "$User" "$opt_M"
 
-[ -n "$opt_W" ] &&
+[ -z "$opt_W" ] ||
 	setUserWarnDaysMySQL "$User" "$opt_W"
 
