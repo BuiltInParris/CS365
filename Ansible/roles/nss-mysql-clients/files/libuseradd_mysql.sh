@@ -116,6 +116,10 @@ function setUserUNameMySQL {
 	verbCmdMySQL "UPDATE users SET username = '$NewUserName' WHERE username = '$OldUserName'"
 }
 
+function encryptPassword {
+	echo "$1" | mkpasswd -m sha-512 -s
+}
+
 # setUserEPWMySQL "$User" "$opt_p"
 function setUserEPWMySQL {
 	local User="$1"

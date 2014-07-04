@@ -58,7 +58,7 @@ fi
 
 if [ -n "$opt_p" ]
 then
-	EPW=$(encryptPassword "$opt_p")
+	EPW="$opt_p"
 else
 	EPW='x'
 fi
