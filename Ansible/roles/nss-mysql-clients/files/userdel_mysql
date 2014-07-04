@@ -13,7 +13,7 @@ do
 			true
 			;;
 		*)
-			eval "opt_${arg}=${OPTARG:=1}"
+			eval "opt_${arg}=\${OPTARG:=1}"
 			;;
 	esac
 done

@@ -10,7 +10,7 @@ while getopts d:E:I:lm:M:nW:v arg
 do
 	case $arg in
 		*)
-			eval "opt_${arg}=${OPTARG:=1}"
+			eval "opt_${arg}=\${OPTARG:=1}"
 			;;
 	esac
 done

@@ -14,8 +14,9 @@ do
 	    #
 	    b|D|e|f|k|K|l|N|o|R|z)
 		;;
+
 	    *)
-		eval "opt_${arg}=${OPTARG:=1}"
+		eval "opt_${arg}=\${OPTARG:=1}"
 		;;
 	esac
 done

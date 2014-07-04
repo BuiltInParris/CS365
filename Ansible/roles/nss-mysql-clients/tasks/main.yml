@@ -1,7 +1,8 @@
 ---
-  - name: Install Pam/NSS Packages
+  - name: Install Pam/NSS Packages + whois for mkpasswd cmd
     apt: name={{ item }}
     with_items:
+      - whois
       - mysql-client
       - libnss-mysql-bg
       - libpam-mysql
