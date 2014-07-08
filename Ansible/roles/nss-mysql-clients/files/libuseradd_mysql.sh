@@ -11,8 +11,8 @@ MYHOME=$(grep '^DHOME=' "$AddUserConf" | cut -f 2 -d =)
 SKEL=$(grep '^SKEL=' "$AddUserConf" | cut -f 2 -d =)
 UID_MIN=$(grep '^UID_MIN' "$LoginDefs" | awk '{print $2}')
 GID_MIN=$(grep '^GID_MIN' "$LoginDefs" | awk '{print $2}')
-SYS_UID_MAX=$(getent passwd | awk -F : '$3 < '"$UID_MIN"' { print $3 }' | sort -n | tail -n 1)
-SYS_GID_MAX=$(getent group | awk -F : '$3 < '"$GID_MIN"' { print $3 }' | sort -n | tail -n 1)
+SYS_UID_MAX=$(getent passwd | grep -v nobody | awk -F : '$3 < '"$UID_MIN"' { print $3 }' | sort -n | tail -n 1)
+SYS_GID_MAX=$(getent group | grep -v nogroup | awk -F : '$3 < '"$GID_MIN"' { print $3 }' | sort -n | tail -n 1)
 
 function warning {
 	echo "$@" 1>&2
