@@ -279,7 +279,7 @@ function getNextUid {
 }
 
 function getNextSysUid {
-	local MaxUID=$(cmdMySQL "SELECT uid FROM users WHERE uid < $UID_MAX ORDER BY uid DESC limit 1")
+	local MaxUID=$(cmdMySQL "SELECT uid FROM users WHERE uid < $SYS_UID_MAX ORDER BY uid DESC limit 1")
 
 	if [ -z "$MaxUID" ]
 	then
@@ -291,7 +291,7 @@ function getNextSysUid {
 }
 
 function getNextSysGid {
-	local MaxUID=$(cmdMySQL "SELECT gid FROM group WHERE gid < $GID_MAX ORDER BY gid DESC limit 1")
+	local MaxUID=$(cmdMySQL "SELECT gid FROM group WHERE gid < $SYS_GID_MAX ORDER BY gid DESC limit 1")
 pp
 	if [ -z "$MaxGID" ]
 	then
