@@ -255,7 +255,7 @@ function rmGroupMySQL {
 }
 
 function getNextGid {
-	local MaxGID=$(cmdMySQL "SELECT gid FROM groups ORDER BY gid DESC limit 1")
+	local MaxGID=$(getent group | awk -F : '{ print $3 }' | sort -n | tail -n 1)
 
 	if [ -z "$MaxGID" ]
 	then
@@ -267,7 +267,7 @@ function getNextGid {
 }
 
 function getNextUid {
-	local MaxUID=$(cmdMySQL "SELECT uid FROM users ORDER BY uid DESC limit 1")
+	local MaxUID=$(getent passwd | awk -F : '{ print $3 }' | sort -n | tail -n 1)
 
 	if [ -z "$MaxUID" ]
 	then
