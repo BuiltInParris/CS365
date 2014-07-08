@@ -49,7 +49,12 @@ then
 		[ -z "$Gid" ] && Gid=$(getNextGid)
 	fi
 else
-	Gid=$(getNextGid)
+	if [ -n "$opt_r" ]
+	then
+		Gid=$(getNextSysGid)
+	else
+		Gid=$(getNextGid)
+	fi
 fi
 
 if [ -n "$opt_m" ]
