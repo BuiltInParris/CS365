@@ -59,6 +59,7 @@ CREATE TABLE users (
   KEY uid (uid)
 ) ENGINE=MyISAM AUTO_INCREMENT=5000;
 
+SET GLOBAL sql_mode='NO_AUTO_VALUE_ON_ZERO';
 # The data ...
 INSERT INTO users (username,gecos,homedir,password)
     VALUES ('cinergi', 'Ben Goodwin', '/home/cinergi', ENCRYPT('cinergi'));
