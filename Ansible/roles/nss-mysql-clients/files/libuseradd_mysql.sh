@@ -9,8 +9,8 @@ LoginDefs=/etc/login.defs
 
 MYHOME=$(grep '^DHOME=' "$AddUserConf" | cut -f 2 -d =)
 SKEL=$(grep '^SKEL=' "$AddUserConf" | cut -f 2 -d =)
-UID_MIN=$(grep '^UID_MIN=' "$LoginDefs" | cut -f 2 -d =)	
-GID_MIN=$(grep '^GID_MIN=' "$LoginDefs" | cut -f 2 -d =)	
+UID_MIN=$(grep '^UID_MIN' "$LoginDefs" | awk '{print $2}')
+GID_MIN=$(grep '^GID_MIN' "$LoginDefs" | awk '{print $2}')
 SYS_UID_MAX=$((UID_MIN - 1))
 SYS_GID_MAX=$((GID_MIN - 1))
 
