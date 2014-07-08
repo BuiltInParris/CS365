@@ -278,8 +278,16 @@ function getNextUid {
 	echo $(($MaxUID + 1))
 }
 
+function getMaxSysUid {
+	getent passwd | awk -F : '$3 < '"$UID_MIN"' { print $3 }' | sort -n | tail -n 1
+}
+
+function getMaxSysGid {
+	getent group | awk -F : '$3 < '"$GID_MIN"' { print $3 }' | sort -n | tail -n 1
+}
+
 function getNextSysUid {
-	local MaxUID=$(cmdMySQL "SELECT uid FROM users WHERE uid < $SYS_UID_MAX ORDER BY uid DESC limit 1")
+	local MaxUID=$(getMaxSysUid)
 
 	if [ -z "$MaxUID" ]
 	then
@@ -291,7 +299,7 @@ function getNextSysUid {
 }
 
 function getNextSysGid {
-	local MaxUID=$(cmdMySQL "SELECT gid FROM group WHERE gid < $SYS_GID_MAX ORDER BY gid DESC limit 1")
+	local MaxUID=$(getMaxSysGid
 pp
 	if [ -z "$MaxGID" ]
 	then
