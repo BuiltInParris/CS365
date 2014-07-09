@@ -299,8 +299,8 @@ function getNextSysUid {
 }
 
 function getNextSysGid {
-	local MaxUID=$(getMaxSysGid
-pp
+	local MaxGID=$(getMaxSysGid)
+
 	if [ -z "$MaxGID" ]
 	then
 		warning "No gids in group table"
