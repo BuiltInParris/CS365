@@ -28,18 +28,6 @@
   - name: Add mysql to group in nssswitch.conf
     lineinfile: "dest=/etc/nsswitch.conf state=present regexp='^group:' line='group:	compat mysql'"
 
-  - name: Add pam_mysql.so to common-account
-    lineinfile: "dest=/etc/pam.d/common-account state=present insertafter='pam_unix.so' line='account sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
-
-  - name: Add pam_mysql.so to common-auth 
-    lineinfile: "dest=/etc/pam.d/common-auth state=present insertafter='pam_unix.so' line='auth sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
-
-  - name: Add pam_mysql.so to common-password
-    lineinfile: "dest=/etc/pam.d/common-password state=present insertafter='pam_unix.so' line='password sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
-
-  - name: Add pam_mysql.so to common-session
-    lineinfile: "dest=/etc/pam.d/common-session state=present insertafter='pam_unix.so' line='session sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
-
   - name: Fix success=1 => success=2 for pam.d/common files
     shell: sed -i 's/success=1/success=2/' {{ item }}
     with_items:
@@ -47,6 +35,18 @@
       - /etc/pam.d/common-auth
       - /etc/pam.d/common-password
       - /etc/pam.d/common-session
+
+  - name: Add pam_mysql.so to common-account
+    lineinfile: "dest=/etc/pam.d/common-account state=present insertafter='pam_unix.so' line='account sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-auth 
+    lineinfile: "dest=/etc/pam.d/common-auth state=present insertafter='pam_unix.so' line='auth [success=1 default=ignore]	 pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-password
+    lineinfile: "dest=/etc/pam.d/common-password state=present insertafter='pam_unix.so' line='password sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
+
+  - name: Add pam_mysql.so to common-session
+    lineinfile: "dest=/etc/pam.d/common-session state=present insertafter='pam_unix.so' line='session sufficient pam_mysql.so config_file=/etc/pam-mysql.conf'"
 
   - name: Copy in libuseradd_mysql.sh
     copy: src=libuseradd_mysql.sh dest=/usr/lib/libuseradd_mysql.sh owner=root group=root mode=755

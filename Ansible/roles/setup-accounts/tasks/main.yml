@@ -4,23 +4,20 @@
   with_sequence:
     - count=6
 
-- name: add users for m0
-  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
-  when: hostname == 'm0'
+- name: debug accounts
+  debug: var={{ item }}
   with_items:
-  - "{{ m0_accounts }}"
+    - "{{ accounts['m0'] }}"
 
-- name: add users for m1
-  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
-  when: hostname == 'm1'
+- name: Add Accounts for m0
+  user:
+    createhome=yes
+    name="{{ item.name }}"
+    comment="{{ item.gecos }}"
+    uid="{{ item.uid }}"
+    shell="/bin/bash"
   with_items:
-  - "{{ m1_accounts }}"
-
-- name: add users for m2
-  user: name={{ item.name }} state=present groups={{ item.groups }} uid={{ item.uid }}
-  when: hostname == 'm2'
-  with_items:
-  - "{{ m2_accounts }}"
+    - "{{ accounts['m0'] }}"
 
 - name: Get list of home directories
   command: ls /home
