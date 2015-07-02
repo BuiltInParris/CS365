@@ -10,3 +10,24 @@
 
   - name: Set /etc/hostname
     lineinfile: dest=/etc/hostname state=present regexp='^.*$' line={{ hostname }}
+
+  - name: Fix sshd_config to not allow passwords over ssh
+    lineinfile: 
+      dest=/etc/ssh/sshd_config
+      line="PermitRootLogin without-password"
+      regexp="PermitRootLogin.*"
+    notify: Restart sshd
+
+  - name: fix sshd_config to only do IPv4 and allow X tunneling
+    lineinfile: 
+      dest=/etc/ssh/sshd_config
+      line="AddressFamily inet"
+      regexp="AddressFamily.*"
+    notify: Restart sshd
+
+  - name: Clear root password
+    lineinfile:
+      dest=/etc/shadow
+      line="root::16228:0:99999:7:::"
+      regexp="root.*"
+

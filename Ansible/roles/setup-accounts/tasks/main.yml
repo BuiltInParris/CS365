@@ -9,7 +9,7 @@
   with_items:
     - "{{ accounts['m0'] }}"
 
-- name: Add Accounts for m0
+- name: Add Accounts for host
   user:
     createhome=yes
     name="{{ item.name }}"
@@ -17,7 +17,7 @@
     uid="{{ item.uid }}"
     shell="/bin/bash"
   with_items:
-    - "{{ accounts['m0'] }}"
+    - "{{ accounts[hostname] }}"
 
 - name: Get list of home directories
   command: ls /home
