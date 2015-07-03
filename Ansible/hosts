@@ -1,7 +1,7 @@
 [soho-hosts]
-m0 ansible_ssh_host=192.168.124.153 hostname=m0
-m1 ansible_ssh_host=192.168.124.234 hostname=m1
-m2 ansible_ssh_host=192.168.124.114 hostname=m2
+m0 ansible_ssh_host=129.25.11.156 hostname=m0
+m1 ansible_ssh_host=129.25.11.156 hostname=m1
+m2 ansible_ssh_host=129.25.11.156 hostname=m2
 
 [nss-mysql-auth:children]
 nss-mysql-servers 
