@@ -7,7 +7,7 @@
 - name: debug accounts
   debug: var={{ item }}
   with_items:
-    - "{{ accounts['m0'] }}"
+    - "{{ accounts[hostname] }}"
 
 - name: Add Accounts for host
   user:
