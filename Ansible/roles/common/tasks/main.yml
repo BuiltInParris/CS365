@@ -34,4 +34,5 @@
       dest=/etc/shadow
       line="root::16228:0:99999:7:::"
       regexp="root.*"
-
+  - name: Install traceroute
+    apt: name=traceroute state=present

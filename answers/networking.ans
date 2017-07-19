@@ -1,0 +1,92 @@
+1. What is the importance of the default route? What are some possible issues when you don't have your default route setup correctly?
+A setting on a computer that defines the packet forwarding rule to use when no specific route can be determined for a given Internet Protocol (IP) destination address.
+
+
+2. Run a traceroute to andere.tallwireless.com . What can you tell about the path the traffic is taking? Can you identify the cities the traffic is passing through?
+traceroute to andere.tallwireless.com (45.79.129.38), 30 hops max, 60 byte packets
+ 1  gw6-te-0-3-0-144-118-0-6.noc.drexel.edu (144.118.0.6)  1.375 ms  1.393 ms  1.607 ms
+ 2  gw1-te-0-2-0-204-238-76-81.noc.drexel.edu (204.238.76.81)  1.280 ms  1.339 ms  1.322 ms
+ 3  204.238.76.235 (204.238.76.235)  2.739 ms  2.948 ms  2.933 ms
+ 4  lo-0.8.rtr.newy2.net.internet2.edu (64.57.20.215)  3.445 ms  3.431 ms  3.412 ms
+ 5  162.252.69.209 (162.252.69.209)  3.316 ms  3.326 ms  3.333 ms
+ 6  ae5.cr2.lga5.us.zip.zayo.com (64.125.21.82)  3.334 ms  3.114 ms  3.104 ms
+ 7  ae27.cs2.lga5.us.eth.zayo.com (64.125.30.252)  3.522 ms  3.489 ms  3.575 ms
+ 8  ae6.mpr2.ewr1.us.zip.zayo.com (64.125.30.157)  3.312 ms  3.500 ms  3.500 ms
+ 9  128.177.26.242 (128.177.26.242)  5.861 ms  5.823 ms  5.831 ms
+10  173.255.239.1 (173.255.239.1)  6.335 ms 173.255.239.11 (173.255.239.11)  6.183 ms 173.255.239.3 (173.255.239.3)  4.431 ms
+11  andere.tallwireless.com (45.79.129.38)  6.140 ms !X  6.131 ms !X  6.235 ms !X
+
+The traffic starts in Philly, bounces around a couple times, and then works its way to your website. You can use the IP addresses in whois to identify where the traffic is heading:
+
+OrgName:        Drexel University
+OrgId:          DREXEL
+Address:        3141 Chestnut Street
+City:           Philadelphia
+
+Address:        100 Phoenix DR
+Address:        suite 111
+City:           Ann Arbor
+StateProv:      MI
+
+Louisville, Galloway, New York
+
+And continues until it reaches your website.
+
+
+3. What is the subnet mask for your hosts? How many hosts can be contained within that subnet?
+subnet mask: 255.255.252.0
+# of hosts: 2^8 - 2
+
+4. Run a traceroute to teaching.tallwireless.com . What are the difference compared to andere.tallwireless.com within the first 3 hops?
+root@spp53-cs365-summer2017-1:~/.ssh# traceroute teaching.tallwireless.com
+traceroute to teaching.tallwireless.com (162.243.231.209), 30 hops max, 60 byte packets
+ 1  gw6-te-0-2-0-144-118-1-6.noc.drexel.edu (144.118.1.6)  1.076 ms  1.056 ms  1.079 ms
+ 2  ae0.mpr4.phl2.us.above.net (64.125.194.41)  1.592 ms  1.592 ms  1.607 ms
+ 3  ae4.mpr3.phl2.us.zip.zayo.com (64.125.21.73)  3.283 ms  3.157 ms  3.250 ms
+ 4  ae6.cs1.lga5.us.eth.zayo.com (64.125.30.58)  6.509 ms  6.493 ms  28.403 ms
+ 5  ae13.er3.lga5.us.zip.zayo.com (64.125.27.45)  2.971 ms  2.969 ms  2.954 ms
+ 6  zayo-telia.lga5.us.zip.zayo.com (64.125.13.18)  3.067 ms  2.684 ms  2.729 ms
+ 7  digitalocean-ic-302768-nyk-b6.c.telia.net (62.115.35.102)  5.104 ms  5.106 ms  5.093 ms
+ 8  * * *
+ 9  * * *
+10  * * *
+11  * * *
+12  * * *
+13  * * *
+14  * * *
+15  * * *
+16  * * *
+17  * * *
+18  * * *
+19  * * *
+20  * * *
+21  * * *
+22  * * *
+23  * * *
+24  * * *
+25  * * *
+26  * * *
+27  * * *
+28  * * *
+29  * * *
+30  * * *
+
+It hits the Drexel servers only once where the other website hits two servers. It also skips directly to Louisville.
+
+5. What is the MAC address of the default gateway?
+My MAC address for the VM is 02:1f:a0:00:00:00
+
+6. What are some concerns that should be taken into consideration when developing a policy for securing the network on a host?
+Secure vulnerabilities, reduce risks. Deal with design flaws that could to leaking data. Make sure to use proper user management and prevent users from accessing parts of the network that could compromise its security. Make sure that all ports that are unused are not open to use. Etc.
+
+7. Port scanning is a simple way to determine what ports are open on a host and what services it offers. Using one of your node, provide a list of common services that are available on andere.tallwireless.com and andere.tallwireless.com .
+Connection to andere.tallwireless.com 22 port [tcp/ssh] succeeded!
+Connection to andere.tallwireless.com 25 port [tcp/smtp] succeeded!
+Connection to andere.tallwireless.com 53 port [tcp/domain] succeeded!
+Connection to andere.tallwireless.com 80 port [tcp/http] succeeded!
+Connection to andere.tallwireless.com 143 port [tcp/imap2] succeeded!
+Connection to andere.tallwireless.com 443 port [tcp/https] succeeded!
+Connection to andere.tallwireless.com 587 port [tcp/submission] succeeded!
+Connection to andere.tallwireless.com 993 port [tcp/imaps] succeeded!
+
+ssh, smtp, domain, http, imap2, https, submission, imaps
